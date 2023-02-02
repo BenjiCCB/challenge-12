@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
 const mysql = require('mysql2');
+const cTable = require('console.table');
 
 function callManagerPrompts(){
   inquirer
@@ -57,5 +58,6 @@ const db = mysql.createConnection(
 // Query database
 db.query('SELECT * FROM students', function (err, results) {
   if(err){console.log(err)}
-  console.log(results);
+  console.log('\n');
+  console.table(results);
 });
