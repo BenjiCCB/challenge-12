@@ -9,7 +9,7 @@ function callMainPrompts(){
       {
         type: 'list',
         name: 'action',
-        message: 'What would you like to do?',
+        message: 'What would you like to do next?',
         choices: ['View departments', 'View roles', 'View employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Exit app']
       }
     ])
@@ -19,26 +19,21 @@ function callMainPrompts(){
     switch (data.action) {
       case "View departments":
         displayTable("departments");
-        callMainPrompts();
         break
       case "View roles":
         displayTable("roles");
-        callMainPrompts();
         break
       case "View employees":
         displayTable("employees");
-        callMainPrompts();
         break
       case "Add a department":
         createDepartment();
-        callMainPrompts();
         break
       case "Add a role":
         createRole();
-        callMainPrompts();
         break
       case "Add an employee":
-        console.log("add emp")
+        createEmployee();
         break;
       case "Update an employee role":
         console.log("update emp");
@@ -67,11 +62,14 @@ const db = mysql.createConnection(
 );
 
 
-// Query tables
+// Query tables (employee, role, department )
 function displayTable(table) {
   db.query(`SELECT * FROM ${table}`, function (err, results) {
     console.log('\n');
     console.table(results);
+  
+    callMainPrompts();
+
   });
 }
 
@@ -91,7 +89,7 @@ function createDepartment(){
     db.query(`INSERT INTO departments (name) VALUES ("${data.department}")`, function (err, results) {
       if(err){console.log(err)}
       console.log('department added!');
-  
+      callMainPrompts();
     });
 
   });
@@ -140,15 +138,90 @@ function createRole(){
     db.query(`INSERT INTO roles (title, salary, department_id) VALUES 
       ("${data.title}", ${data.salary}, ${data.department})`, function (err, results) {
       
-      console.log('department added!');
-  
+      console.log('Department added!');  
+      callMainPrompts();
     });
 
   });
+
 }
 
 
-// // Create Employee
+// Create Employee
+function createEmployee(){
+  
+  // roles choices
+  var rolesArray = []
+  db.query(`SELECT * FROM roles`, function (err, results) {
+
+    var roles = results;
+    for (let i = 0; i < roles.length; i++) {
+      const { id, title, salary, department_id } = roles[i];
+
+      const roleOption = {
+        name: title,
+        value: id,
+      };
+      rolesArray.push(roleOption)
+    } 
+  });
+
+  // manager employee choices
+  var employeesArray = []
+  db.query(`SELECT * FROM employees`, function (err, results) {
+
+    var employees = results;
+    for (let i = 0; i < employees.length; i++) {
+      const { id, first_name, last_name, role_id, manager_id } = employees[i];
+
+      const employeesOption = {
+        name: first_name + " " + last_name,
+        value: id,
+      };
+      employeesArray.push(employeesOption)
+    } 
+  });
+
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'first',
+        message: "What is the employee's first name?"
+      },
+      {
+        type: 'input',
+        name: 'last',
+        message: "What is the employee's last name?"
+      },
+      {
+        type: 'list',
+        name: 'role',
+        message: "What is the employee's role?",
+        choices: rolesArray
+      },
+      {
+        type: 'list',
+        name: 'manager',
+        message: "Who is the employee's manager?",
+        choices: employeesArray
+      }
+    ])
+
+  .then((data) => {
+
+    db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES 
+      ("${data.first}", "${data.last}", ${data.role}, ${data.manager})`, function (err, results) {
+      
+      console.log('Employee added!');
+      callMainPrompts();
+    });
+
+  });
+
+}
+
+// // Update Employee
 // function createEmployee(){
   
 //   // roles choices
@@ -163,7 +236,23 @@ function createRole(){
 //         name: title,
 //         value: id,
 //       };
-//       departmentsArray.push(depOption)
+//       rolesArray.push(roleOption)
+//     } 
+//   });
+
+//   // manager employee choices
+//   var employeesArray = []
+//   db.query(`SELECT * FROM employees`, function (err, results) {
+
+//     var employees = results;
+//     for (let i = 0; i < employees.length; i++) {
+//       const { id, first_name, last_name, role_id, manager_id } = employees[i];
+
+//       const employeesOption = {
+//         name: first_name + " " + last_name,
+//         value: id,
+//       };
+//       employeesArray.push(employeesOption)
 //     } 
 //   });
 
@@ -171,33 +260,45 @@ function createRole(){
 //     .prompt([
 //       {
 //         type: 'input',
-//         name: 'title',
-//         message: "What is the role's title?"
+//         name: 'first',
+//         message: "What is the employee's first name?"
 //       },
 //       {
 //         type: 'input',
-//         name: 'salary',
-//         message: "What is the role's salary?"
+//         name: 'last',
+//         message: "What is the employee's last name?"
 //       },
 //       {
 //         type: 'list',
-//         name: 'department',
-//         message: "What is the role's department?",
-//         choices: departmentsArray
+//         name: 'role',
+//         message: "What is the employee's role?",
+//         choices: rolesArray
+//       },
+//       {
+//         type: 'list',
+//         name: 'manager',
+//         message: "Who is the employee's manager?",
+//         choices: employeesArray
 //       }
 //     ])
 
 //   .then((data) => {
-    
-//     db.query(`INSERT INTO roles (title, salary, department_id) VALUES 
-//       ("${data.title}", ${data.salary}, ${data.department})`, function (err, results) {
+
+//     db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES 
+//       ("${data.first}", "${data.last}", ${data.role}, ${data.manager})`, function (err, results) {
       
-//       console.log('department added!');
-  
+//       console.log('Employee added!');
+//       callMainPrompts();
 //     });
 
 //   });
+
 // }
+
+
+
+// 
+
 
 
 // ------------START APP------------
