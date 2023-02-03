@@ -20,20 +20,23 @@ function callMainPrompts(){
       case "View departments":
         displayTable("departments");
         callMainPrompts();
-        break;
+        break
       case "View roles":
         displayTable("roles");
         callMainPrompts();
-        break;
+        break
       case "View employees":
         displayTable("employees");
-        break;
+        callMainPrompts();
+        break
       case "Add a department":
         createDepartment();
-        break;
+        callMainPrompts();
+        break
       case "Add a role":
         createRole();
-        break;
+        callMainPrompts();
+        break
       case "Add an employee":
         console.log("add emp")
         break;
@@ -43,14 +46,12 @@ function callMainPrompts(){
       case "Exit app":
         console.log("exiting app");
         process.exit();
-        break;
       default:
           console.log("error occured")
     }
 
   });
 }
-
 
 // Connect to database
 const db = mysql.createConnection(
@@ -69,7 +70,6 @@ const db = mysql.createConnection(
 // Query tables
 function displayTable(table) {
   db.query(`SELECT * FROM ${table}`, function (err, results) {
-    if(err){console.log(err)}
     console.log('\n');
     console.table(results);
   });
@@ -101,25 +101,21 @@ function createDepartment(){
 function createRole(){
   
   var departmentsArray = []
-
   db.query(`SELECT * FROM departments`, function (err, results) {
 
     var departments = results;
     for (let i = 0; i < departments.length; i++) {
       const { id, name } = departments[i];
-      
+
       const depOption = {
         name: name,
         value: id,
       };
-
       departmentsArray.push(depOption)
     } 
-
   });
 
   inquirer
-
     .prompt([
       {
         type: 'input',
@@ -150,6 +146,59 @@ function createRole(){
 
   });
 }
+
+
+// // Create Employee
+// function createEmployee(){
+  
+//   // roles choices
+//   var rolesArray = []
+//   db.query(`SELECT * FROM roles`, function (err, results) {
+
+//     var roles = results;
+//     for (let i = 0; i < roles.length; i++) {
+//       const { id, title, salary, department_id } = roles[i];
+
+//       const roleOption = {
+//         name: title,
+//         value: id,
+//       };
+//       departmentsArray.push(depOption)
+//     } 
+//   });
+
+//   inquirer
+//     .prompt([
+//       {
+//         type: 'input',
+//         name: 'title',
+//         message: "What is the role's title?"
+//       },
+//       {
+//         type: 'input',
+//         name: 'salary',
+//         message: "What is the role's salary?"
+//       },
+//       {
+//         type: 'list',
+//         name: 'department',
+//         message: "What is the role's department?",
+//         choices: departmentsArray
+//       }
+//     ])
+
+//   .then((data) => {
+    
+//     db.query(`INSERT INTO roles (title, salary, department_id) VALUES 
+//       ("${data.title}", ${data.salary}, ${data.department})`, function (err, results) {
+      
+//       console.log('department added!');
+  
+//     });
+
+//   });
+// }
+
 
 // ------------START APP------------
 
