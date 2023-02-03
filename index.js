@@ -3,7 +3,7 @@ const fs = require('fs');
 const mysql = require('mysql2');
 const cTable = require('console.table');
 
-function callInitialPrompts(){
+function callMainPrompts(){
   inquirer
     .prompt([
       {
@@ -18,28 +18,31 @@ function callInitialPrompts(){
 
     switch (data.action) {
       case "View departments":
-        queryTable("departments");
+        displayTable("departments");
+        callMainPrompts();
         break;
       case "View roles":
-        queryTable("roles");
+        displayTable("roles");
+        callMainPrompts();
         break;
       case "View employees":
-        queryTable("employees");
+        displayTable("employees");
         break;
       case "Add a department":
-        console.log("add dept");
+        createDepartment();
         break;
       case "Add a role":
-        console.log("add role");
+        createRole();
         break;
       case "Add an employee":
         console.log("add emp")
         break;
       case "Update an employee role":
-        console.log("update emp")
+        console.log("update emp");
         break;
-      case "Update an employee role":
-        console.log("exit app")
+      case "Exit app":
+        console.log("exiting app");
+        process.exit();
         break;
       default:
           console.log("error occured")
@@ -47,25 +50,6 @@ function callInitialPrompts(){
 
   });
 }
-
-
-// function callDepartmentPrompts(){
-//   inquirer
-//     .prompt([
-//       {
-//         type: 'list',
-//         name: 'action',
-//         message: "What is the name of the department you'd like to add?",
-//         choices: ['View departments', 'View roles', 'View employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Exit app']
-//       }
-//     ])
-
-//   .then((data) => {
-    
-
-
-//   });
-// }
 
 
 // Connect to database
@@ -82,8 +66,8 @@ const db = mysql.createConnection(
 );
 
 
-// Query database
-function queryTable(table) {
+// Query tables
+function displayTable(table) {
   db.query(`SELECT * FROM ${table}`, function (err, results) {
     if(err){console.log(err)}
     console.log('\n');
@@ -91,4 +75,82 @@ function queryTable(table) {
   });
 }
 
-callInitialPrompts()
+// Create Department
+function createDepartment(){
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'department',
+        message: "What is the name of the department you'd like to add?"
+      }
+    ])
+
+  .then((data) => {
+    
+    db.query(`INSERT INTO departments (name) VALUES ("${data.department}")`, function (err, results) {
+      if(err){console.log(err)}
+      console.log('department added!');
+  
+    });
+
+  });
+}
+
+// Create Role
+function createRole(){
+  
+  var departmentsArray = []
+
+  db.query(`SELECT * FROM departments`, function (err, results) {
+
+    var departments = results;
+    for (let i = 0; i < departments.length; i++) {
+      const { id, name } = departments[i];
+      
+      const depOption = {
+        name: name,
+        value: id,
+      };
+
+      departmentsArray.push(depOption)
+    } 
+
+  });
+
+  inquirer
+
+    .prompt([
+      {
+        type: 'input',
+        name: 'title',
+        message: "What is the role's title?"
+      },
+      {
+        type: 'input',
+        name: 'salary',
+        message: "What is the role's salary?"
+      },
+      {
+        type: 'list',
+        name: 'department',
+        message: "What is the role's department?",
+        choices: departmentsArray
+      }
+    ])
+
+  .then((data) => {
+    
+    db.query(`INSERT INTO roles (title, salary, department_id) VALUES 
+      ("${data.title}", ${data.salary}, ${data.department})`, function (err, results) {
+      
+      console.log('department added!');
+  
+    });
+
+  });
+}
+
+// ------------START APP------------
+
+callMainPrompts()
