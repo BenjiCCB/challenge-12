@@ -3,6 +3,15 @@ const fs = require('fs');
 const mysql = require('mysql2');
 const cTable = require('console.table');
 
+
+// function validateInput(input, type) {
+//   if(typeof input == type) {
+//       return true;
+//   } else {
+//       return "Invalid type";
+//   }
+// }
+
 function callMainPrompts(){
   inquirer
     .prompt([
@@ -10,7 +19,8 @@ function callMainPrompts(){
         type: 'list',
         name: 'action',
         message: 'What would you like to do next?',
-        choices: ['View departments', 'View roles', 'View employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Exit app']
+        choices: ['View departments', 'View roles', 'View employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Exit app'],
+        loop: false
       }
     ])
 
@@ -36,7 +46,7 @@ function callMainPrompts(){
         createEmployee();
         break;
       case "Update an employee role":
-        console.log("update emp");
+        updateEmployee();
         break;
       case "Exit app":
         console.log("exiting app");
@@ -69,7 +79,6 @@ function displayTable(table) {
     console.table(results);
   
     callMainPrompts();
-
   });
 }
 
@@ -80,15 +89,16 @@ function createDepartment(){
       {
         type: 'input',
         name: 'department',
-        message: "What is the name of the department you'd like to add?"
+        message: "What is the name of the department you'd like to add?",
       }
     ])
 
   .then((data) => {
     
+
     db.query(`INSERT INTO departments (name) VALUES ("${data.department}")`, function (err, results) {
       if(err){console.log(err)}
-      console.log('department added!');
+      console.log('Department added!');
       callMainPrompts();
     });
 
@@ -134,7 +144,7 @@ function createRole(){
     ])
 
   .then((data) => {
-    
+
     db.query(`INSERT INTO roles (title, salary, department_id) VALUES 
       ("${data.title}", ${data.salary}, ${data.department})`, function (err, results) {
       
@@ -221,86 +231,74 @@ function createEmployee(){
 
 }
 
-// // Update Employee
-// function createEmployee(){
+// Update Employee
+function updateEmployee(){
   
-//   // roles choices
-//   var rolesArray = []
-//   db.query(`SELECT * FROM roles`, function (err, results) {
+  //  employee choices
+  var employeesArray = []
+  db.query(`SELECT * FROM employees`, function (err, results) {
 
-//     var roles = results;
-//     for (let i = 0; i < roles.length; i++) {
-//       const { id, title, salary, department_id } = roles[i];
+    var employees = results;
+    for (let i = 0; i < employees.length; i++) {
+      const { id, first_name, last_name, role_id, manager_id } = employees[i];
 
-//       const roleOption = {
-//         name: title,
-//         value: id,
-//       };
-//       rolesArray.push(roleOption)
-//     } 
-//   });
+      const employeesOption = {
+        name: first_name + " " + last_name,
+        value: id,
+      };
+      employeesArray.push(employeesOption)
+    } 
+  });
 
-//   // manager employee choices
-//   var employeesArray = []
-//   db.query(`SELECT * FROM employees`, function (err, results) {
+  console.log(employeesArray);
 
-//     var employees = results;
-//     for (let i = 0; i < employees.length; i++) {
-//       const { id, first_name, last_name, role_id, manager_id } = employees[i];
+  // roles choices
+  var rolesArray = []
+  db.query(`SELECT * FROM roles`, function (err, results) {
 
-//       const employeesOption = {
-//         name: first_name + " " + last_name,
-//         value: id,
-//       };
-//       employeesArray.push(employeesOption)
-//     } 
-//   });
+    var roles = results;
+    for (let i = 0; i < roles.length; i++) {
+      const { id, title, salary, department_id } = roles[i];
 
-//   inquirer
-//     .prompt([
-//       {
-//         type: 'input',
-//         name: 'first',
-//         message: "What is the employee's first name?"
-//       },
-//       {
-//         type: 'input',
-//         name: 'last',
-//         message: "What is the employee's last name?"
-//       },
-//       {
-//         type: 'list',
-//         name: 'role',
-//         message: "What is the employee's role?",
-//         choices: rolesArray
-//       },
-//       {
-//         type: 'list',
-//         name: 'manager',
-//         message: "Who is the employee's manager?",
-//         choices: employeesArray
-//       }
-//     ])
+      const roleOption = {
+        name: title,
+        value: id,
+      };
+      rolesArray.push(roleOption)
+    } 
+  });
 
-//   .then((data) => {
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'employee',
+        message: "Which employee would you like to update?",
+        choices: employeesArray
+      },
+      {
+        type: 'list',
+        name: 'role',
+        message: "What is the employee's new role?",
+        choices: rolesArray
+      }
+    ])
 
-//     db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES 
-//       ("${data.first}", "${data.last}", ${data.role}, ${data.manager})`, function (err, results) {
+  .then((data) => {
+
+    // db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES 
+    //   ("${data.first}", "${data.last}", ${data.role}, ${data.manager})`, function (err, results) {
       
-//       console.log('Employee added!');
-//       callMainPrompts();
-//     });
+    //   console.log('Employee added!');
+    //   callMainPrompts();
+    // });
 
-//   });
+  });
 
-// }
-
-
-
-// 
-
+}
 
 
 // ------------START APP------------
 
+console.clear()
 callMainPrompts()
