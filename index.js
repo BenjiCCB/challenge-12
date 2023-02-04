@@ -18,7 +18,7 @@ function callMainPrompts(){
       {
         type: 'list',
         name: 'action',
-        message: 'What would you like to do next?',
+        message: 'What would you like to do (next)?',
         choices: ['View departments', 'View roles', 'View employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Exit app'],
         loop: false
       }
@@ -184,11 +184,11 @@ function createEmployee(){
     for (let i = 0; i < employees.length; i++) {
       const { id, first_name, last_name, role_id, manager_id } = employees[i];
 
-      const employeesOption = {
+      const employeeOption = {
         name: first_name + " " + last_name,
         value: id,
       };
-      employeesArray.push(employeesOption)
+      employeesArray.push(employeeOption)
     } 
   });
 
@@ -228,7 +228,6 @@ function createEmployee(){
     });
 
   });
-
 }
 
 // Update Employee
@@ -242,15 +241,13 @@ function updateEmployee(){
     for (let i = 0; i < employees.length; i++) {
       const { id, first_name, last_name, role_id, manager_id } = employees[i];
 
-      const employeesOption = {
+      const employeeOption = {
         name: first_name + " " + last_name,
         value: id,
       };
-      employeesArray.push(employeesOption)
+      employeesArray.push(employeeOption);
     } 
-  });
-
-  console.log(employeesArray);
+  })
 
   // roles choices
   var rolesArray = []
@@ -266,7 +263,7 @@ function updateEmployee(){
       };
       rolesArray.push(roleOption)
     } 
-  });
+  })
 
   inquirer
     .prompt([
@@ -294,7 +291,6 @@ function updateEmployee(){
     // });
 
   });
-
 }
 
 
