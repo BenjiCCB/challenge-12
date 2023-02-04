@@ -263,7 +263,12 @@ function updateEmployee(){
       };
       rolesArray.push(roleOption)
     } 
+    console.log("WORKS here")
+    console.log(rolesArray)
   })
+
+  console.log("DOESN'T work here")
+  console.log(rolesArray)
 
   inquirer
     .prompt([
