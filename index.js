@@ -198,7 +198,6 @@ function createDepartment(){
 
   .then((data) => {
     db.query(`INSERT INTO departments (name) VALUES ("${data.department}")`, function (err, results) {
-      if(err){console.log(err)}
       console.log(`\n** Department added **\n`);
       callMainPrompts();
     });
@@ -222,7 +221,15 @@ async function createRole(){
       {
         type: 'input',
         name: 'salary',
-        message: "What is the role's salary?"
+        message: "What is the role's salary?",
+        validate: async(data) => {
+          if (parseInt(data)) {
+            return true
+          } else {
+            console.log("\nPlease enter a number only\n")
+            return false
+          }
+        }
       },
       {
         type: 'list',
@@ -234,22 +241,11 @@ async function createRole(){
 
   .then((data) => {
 
-
-    var salaryVal = parseInt(data.salary) 
-
-    if(salaryVal == "NaN"){
-      console.log("Salary value must be a number. Please try again")
-      // createRole();
-    }
-
-    
-
-    db.query(`INSERT INTO roles (title, salary, department_id) VALUES 
-      ("${data.title}", ${data.salary}, ${data.department})`, function (err, results) {
-      
-      console.log('\n** Department added **\n');  
-      callMainPrompts();
-    });
+      db.query(`INSERT INTO roles (title, salary, department_id) VALUES 
+        ("${data.title}", ${data.salary}, ${data.department})`, function (err, results) {
+        console.log('\n** Role added **\n');  
+        callMainPrompts();
+      });
 
   });
 }
@@ -291,7 +287,6 @@ async function createEmployee(){
 
     db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES 
       ("${data.first}", "${data.last}", ${data.role}, ${data.manager})`, function (err, results) {
-      
       console.log('\n** Employee added **\n');
       callMainPrompts();
     });
