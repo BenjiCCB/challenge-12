@@ -4,14 +4,8 @@ const mysql = require('mysql2');
 const cTable = require('console.table');
 
 
-// function validateInput(input, type) {
-//   if(typeof input == type) {
-//       return true;
-//   } else {
-//       return "Invalid type";
-//   }
-// }
-
+// Call Main Prompts
+//----------------------------------------------------//
 function callMainPrompts(){
   inquirer
     .prompt([
@@ -58,7 +52,8 @@ function callMainPrompts(){
   });
 }
 
-// Connect to database
+// Connect to Database
+//----------------------------------------------------//
 const db = mysql.createConnection(
   {
     host: 'localhost',
@@ -71,8 +66,8 @@ const db = mysql.createConnection(
   console.log(`Connected to the classlist_db database.`)
 );
 
-
-// Query tables (employee, role, department )
+// Display tables (employee, role, department )
+//----------------------------------------------------//
 function displayTable(table) {
   db.query(`SELECT * FROM ${table}`, function (err, results) {
     console.log('\n');
@@ -82,7 +77,53 @@ function displayTable(table) {
   });
 }
 
+// Generate employee choices
+//----------------------------------------------------//
+function generateEmployeeChoices(){
+  var empPromise = new Promise ((resolve, reject) => {
+    db.query(`SELECT * FROM employees`, function (err, results) {
+      var employeesArray = []
+      var employees = results;
+      for (let i = 0; i < employees.length; i++) {
+        const { id, first_name, last_name, role_id, manager_id } = employees[i];
+  
+        const employeeOption = {
+          name: first_name + " " + last_name,
+          value: id,
+        };
+        employeesArray.push(employeeOption)
+      } 
+      resolve(employeesArray)
+    });
+  })
+  return empPromise;
+}
+
+// Generate role choices
+//----------------------------------------------------//
+
+async function generateRoleChoices(){
+  var rolePromise = new Promise ((resolve, reject) => {
+    db.query(`SELECT * FROM roles`, function (err, results) {
+      var rolesArray = []
+      var roles = results;
+      for (let i = 0; i < roles.length; i++) {
+        const { id, title, salary, department_id } = roles[i];
+  
+        const roleOption = {
+          name: title,
+          value: id,
+        };
+        rolesArray.push(roleOption)
+      }
+      resolve(rolesArray)
+    });
+  })
+  return rolePromise;
+}
+
 // Create Department
+//----------------------------------------------------//
 function createDepartment(){
   inquirer
     .prompt([
@@ -94,11 +135,9 @@ function createDepartment(){
     ])
 
   .then((data) => {
-    
-
     db.query(`INSERT INTO departments (name) VALUES ("${data.department}")`, function (err, results) {
       if(err){console.log(err)}
-      console.log('Department added!');
+      console.log(`\n** Department added **\n`);
       callMainPrompts();
     });
 
@@ -106,6 +145,7 @@ function createDepartment(){
 }
 
 // Create Role
+//----------------------------------------------------//
 function createRole(){
   
   var departmentsArray = []
@@ -148,7 +188,7 @@ function createRole(){
     db.query(`INSERT INTO roles (title, salary, department_id) VALUES 
       ("${data.title}", ${data.salary}, ${data.department})`, function (err, results) {
       
-      console.log('Department added!');  
+      console.log('\n** Department added **\n');  
       callMainPrompts();
     });
 
@@ -158,39 +198,11 @@ function createRole(){
 
 
 // Create Employee
-function createEmployee(){
+//----------------------------------------------------//
+async function createEmployee(){
   
-  // roles choices
-  var rolesArray = []
-  db.query(`SELECT * FROM roles`, function (err, results) {
-
-    var roles = results;
-    for (let i = 0; i < roles.length; i++) {
-      const { id, title, salary, department_id } = roles[i];
-
-      const roleOption = {
-        name: title,
-        value: id,
-      };
-      rolesArray.push(roleOption)
-    } 
-  });
-
-  // manager employee choices
-  var employeesArray = []
-  db.query(`SELECT * FROM employees`, function (err, results) {
-
-    var employees = results;
-    for (let i = 0; i < employees.length; i++) {
-      const { id, first_name, last_name, role_id, manager_id } = employees[i];
-
-      const employeeOption = {
-        name: first_name + " " + last_name,
-        value: id,
-      };
-      employeesArray.push(employeeOption)
-    } 
-  });
+  var rolesArray = await generateRoleChoices();
+  var employeesArray = await generateEmployeeChoices();
 
   inquirer
     .prompt([
@@ -223,7 +235,7 @@ function createEmployee(){
     db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES 
       ("${data.first}", "${data.last}", ${data.role}, ${data.manager})`, function (err, results) {
       
-      console.log('Employee added!');
+      console.log('\n** Employee added **\n');
       callMainPrompts();
     });
 
@@ -231,45 +243,12 @@ function createEmployee(){
 }
 
 // Update Employee
-function updateEmployee(){
+//----------------------------------------------------//
+
+async function updateEmployee(){
+  var employeesArray = await generateEmployeeChoices();
+  var rolesArray = await generateRoleChoices();
   
-  //  employee choices
-  var employeesArray = []
-  db.query(`SELECT * FROM employees`, function (err, results) {
-
-    var employees = results;
-    for (let i = 0; i < employees.length; i++) {
-      const { id, first_name, last_name, role_id, manager_id } = employees[i];
-
-      const employeeOption = {
-        name: first_name + " " + last_name,
-        value: id,
-      };
-      employeesArray.push(employeeOption);
-    } 
-  })
-
-  // roles choices
-  var rolesArray = []
-  db.query(`SELECT * FROM roles`, function (err, results) {
-
-    var roles = results;
-    for (let i = 0; i < roles.length; i++) {
-      const { id, title, salary, department_id } = roles[i];
-
-      const roleOption = {
-        name: title,
-        value: id,
-      };
-      rolesArray.push(roleOption)
-    } 
-    console.log("WORKS here")
-    console.log(rolesArray)
-  })
-
-  console.log("DOESN'T work here")
-  console.log(rolesArray)
-
   inquirer
     .prompt([
       {
@@ -288,18 +267,17 @@ function updateEmployee(){
 
   .then((data) => {
 
-    // db.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES 
-    //   ("${data.first}", "${data.last}", ${data.role}, ${data.manager})`, function (err, results) {
-      
-    //   console.log('Employee added!');
-    //   callMainPrompts();
-    // });
+    db.query(`UPDATE employees SET role_id = ${data.role} WHERE id = ${data.employee}`, 
+      function (err, results) { 
+      console.log('\n** Employee updated **\n');
+      callMainPrompts();
+    });
 
   });
 }
 
-
-// ------------START APP------------
+// Start App
+//----------------------------------------------------//
 
 console.clear()
 callMainPrompts()
