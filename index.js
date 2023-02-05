@@ -178,22 +178,9 @@ function createDepartment(){
 
 // Create Role
 //----------------------------------------------------//
-function createRole(){
+async function createRole(){
   
-  var departmentsArray = []
-  db.query(`SELECT * FROM departments`, function (err, results) {
-
-    var departments = results;
-    for (let i = 0; i < departments.length; i++) {
-      const { id, name } = departments[i];
-
-      const depOption = {
-        name: name,
-        value: id,
-      };
-      departmentsArray.push(depOption)
-    } 
-  });
+  var departmentsArray = await generateDepartmentChoices();
 
   inquirer
     .prompt([
@@ -225,9 +212,7 @@ function createRole(){
     });
 
   });
-
 }
-
 
 // Create Employee
 //----------------------------------------------------//
