@@ -24,10 +24,10 @@ function callMainPrompts(){
 
     switch (data.action) {
       case "View departments":
-        displayTable("departments");
+        displayDepartments();
         break
       case "View roles":
-        displayTable("roles");
+        displayRoles();
         break
       case "View employees":
         displayEmployees();
@@ -74,10 +74,10 @@ const db = mysql.createConnection(
   console.log(`Connected to the classlist_db database.`)
 );
 
-// Display tables (employee, role, department )
+// Display Departments
 //----------------------------------------------------//
-function displayTable(table) {
-  db.query(`SELECT * FROM ${table}`, function (err, results) {
+function displayDepartments() {
+  db.query(`SELECT departments.id, departments.name AS Department FROM departments `, function (err, results) {
     console.log('\n');
     console.table(results);
   
@@ -89,10 +89,24 @@ function displayTable(table) {
 //----------------------------------------------------//
 function displayEmployees() {
   
-  db.query(`SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name, manager.first_name as manager_first, manager.last_name as manager_last
-  FROM employees
+  db.query(`SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department, manager.first_name as manager_first, manager.last_name as manager_last
+      FROM employees
       JOIN employees manager ON manager.id = employees.manager_id
       JOIN roles ON employees.role_id = roles.id
+      JOIN departments ON roles.department_id = departments.id;`, function (err, results) {
+    console.log('\n');
+    console.table(results);
+  
+    callMainPrompts();
+  });
+}
+
+// Display Roles
+//----------------------------------------------------//
+function displayRoles() {
+  
+  db.query(`SELECT roles.id, roles.title, roles.salary, roles.title, departments.name AS department
+      FROM roles
       JOIN departments ON roles.department_id = departments.id;`, function (err, results) {
     console.log('\n');
     console.table(results);
@@ -219,6 +233,16 @@ async function createRole(){
     ])
 
   .then((data) => {
+
+
+    var salaryVal = parseInt(data.salary) 
+
+    if(salaryVal == "NaN"){
+      console.log("Salary value must be a number. Please try again")
+      // createRole();
+    }
+
+    
 
     db.query(`INSERT INTO roles (title, salary, department_id) VALUES 
       ("${data.title}", ${data.salary}, ${data.department})`, function (err, results) {
