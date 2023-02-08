@@ -6,7 +6,7 @@ This app is a command-line content management system, designed to let a user man
 
 View more info below, as well as a video preview and a screenshot of the app in action.  
 
-Video overview: [link here](https://monosnap.com/file/nx5OahEUse4uMMvlAucjjeHPtNRmqO)
+Video overview: [link here](https://monosnap.com/file/1jQpKT3Yd7HAYYASv5lBfD0iBKZE7a)
 
 ![screenshot](./assets/screenshots/appshot.png)
 
