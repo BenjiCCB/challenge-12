@@ -94,15 +94,15 @@ function displayDepartments() {
 //----------------------------------------------------//
 function displayEmployees() {
   
-  db.query(`SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department, manager.first_name as manager_first, manager.last_name as manager_last
-      FROM employees
-      JOIN employees manager ON manager.id = employees.manager_id
-      JOIN roles ON employees.role_id = roles.id
-      JOIN departments ON roles.department_id = departments.id
-      ORDER BY employees.id;`, function (err, results) {
+  db.query(`SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department, CONCAT(m.first_name, " ", m.last_name) AS manager
+  FROM employees 
+  LEFT JOIN roles ON employees.role_id = roles.id
+  LEFT JOIN departments ON roles.department_id = departments.id
+  LEFT JOIN employees m ON employees.manager_id = m.id 
+  ORDER BY employees.id;`, 
+    function (err, results) {  
     console.log('\n');
     console.table(results);
-  
     callMainPrompts();
   });
 }
@@ -111,9 +111,9 @@ function displayEmployees() {
 //----------------------------------------------------//
 function displayRoles() {
   
-  db.query(`SELECT roles.id, roles.title, roles.salary, roles.title, departments.name AS department
+  db.query(`SELECT roles.id, roles.title, roles.salary, departments.name AS department
       FROM roles
-      JOIN departments ON roles.department_id = departments.id;`, function (err, results) {
+      LEFT JOIN departments ON roles.department_id = departments.id;`, function (err, results) {
     console.log('\n');
     console.table(results);
   
