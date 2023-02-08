@@ -2,11 +2,11 @@
 
 ## Description 
 
-This app is a command-line content management system, designed to let a user manage a company's employee database, using Node.js, Inquirer, and MySQL.  With the app, you can create, modify, and delete items including employees, roles, and departments, as well as see advanced metrics about the organization's makeup.  Be sure to view the 'delete items', 'update an employee manager', and 'view advanced' sections for bonus functionality implemented
+This app is a command-line content management system, designed to let a user manage a company's employee database, using Node.js, Inquirer, and MySQL.  With the app, you can create and modify items including employees, roles, and departments, as well as see advanced metrics about the organization's makeup.  Be sure to view the 'update an employee manager' and 'view advanced' sections for bonus functionality (deletion has been removed due to resulting database conflicts)
 
 View more info below, as well as a video preview and a screenshot of the app in action.  
 
-Video overview: [link here](https://monosnap.com/file/53NlEPpmcs5aZZWNeIs9xxoLnemdBV)
+Video overview: [link here](https://monosnap.com/file/nx5OahEUse4uMMvlAucjjeHPtNRmqO)
 
 ![screenshot](./assets/screenshots/appshot.png)
 
@@ -46,10 +46,12 @@ The app provides a variety of functionalities, to help a user view and control d
 
 * View departments, roles, and employees
 * Add departments, roles, and employees
-* Delete departments, roles, and employees (bonus)
-* Update employee roles and managers
+* Update employee roles and managers (bonus)
 * View employees by manager, emloyees by department, and budget by department (bonus)
 * Exit the application
+
+
+Note, item deletion has been deprecated due to databse conflicts (ie deletions cascading to linked tables)
 
 ---
 

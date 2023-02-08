@@ -17,7 +17,7 @@ function callMainPrompts(){
         type: 'list',
         name: 'action',
         message: 'What would you like to do (next)?',
-        choices: ['View departments', 'View roles', 'View employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Update an employee manager', 'Delete an item', 'View advanced', 'Exit app'],
+        choices: ['View departments', 'View roles', 'View employees', 'Add a department', 'Add a role', 'Add an employee', 'Update an employee role', 'Update an employee manager', 'View advanced', 'Exit app'],
         loop: false
       }
     ])
@@ -47,14 +47,11 @@ function callMainPrompts(){
         updateEmployeeRole();
         break;
       case "Update an employee manager":
-          updateEmployeeManager();
-      break;
-      case "Delete an item":
-        deleteItem();
-      break;
+        updateEmployeeManager();
+        break;
       case "View advanced":
         viewAdvanced();
-      break;
+        break;
       case "Exit app":
         console.log("\n** Exiting app **\n");
         process.exit();
@@ -94,15 +91,15 @@ function displayDepartments() {
 //----------------------------------------------------//
 function displayEmployees() {
   
-  db.query(`SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department, CONCAT(m.first_name, " ", m.last_name) AS manager
-  FROM employees 
-  LEFT JOIN roles ON employees.role_id = roles.id
-  LEFT JOIN departments ON roles.department_id = departments.id
-  LEFT JOIN employees m ON employees.manager_id = m.id 
-  ORDER BY employees.id;`, 
-    function (err, results) {  
+  db.query(`SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department, manager.first_name as manager_first, manager.last_name as manager_last
+      FROM employees
+      JOIN employees manager ON manager.id = employees.manager_id
+      JOIN roles ON employees.role_id = roles.id
+      JOIN departments ON roles.department_id = departments.id
+      ORDER BY employees.id;`, function (err, results) {
     console.log('\n');
     console.table(results);
+  
     callMainPrompts();
   });
 }
@@ -111,9 +108,10 @@ function displayEmployees() {
 //----------------------------------------------------//
 function displayRoles() {
   
-  db.query(`SELECT roles.id, roles.title, roles.salary, departments.name AS department
+  db.query(`SELECT roles.id, roles.title, roles.salary, roles.title, departments.name AS department
       FROM roles
-      LEFT JOIN departments ON roles.department_id = departments.id;`, function (err, results) {
+      JOIN departments ON roles.department_id = departments.id
+      ORDER BY roles.id;`, function (err, results) {
     console.log('\n');
     console.table(results);
   
@@ -371,108 +369,6 @@ async function updateEmployeeManager(){
   });
 }
 
-// Delete Item
-//----------------------------------------------------//
-
-function deleteItem(){
-
-  inquirer
-    .prompt([
-      {
-        type: 'list',
-        name: 'type',
-        message: "Which would you like to delete?",
-        choices: ["Employee", "Role", "Department"]
-      }
-    ])
-
-  .then((data) => {
-
-    if(data.type == "Employee"){
-      deleteEmployee();
-    } else if (data.type == "Role"){
-      deleteRole();
-    } else if (data.type == "Department"){
-      deleteDepartment();
-    }
-  })
-}
-
-  // Delete Employee
-  //----------------------
-  
-  async function deleteEmployee(){
-  
-    var employeesArray = await generateEmployeeChoices();
-
-    inquirer
-    .prompt([
-      {
-        type: 'list',
-        name: 'employee',
-        message: "Which employee would you like to delete?",
-        choices: employeesArray
-      }
-    ])
-    .then((data) => {
-      db.query(`DELETE FROM employees WHERE id = ${data.employee}`, 
-        function (err, results) { 
-        console.log('\n** Employee deleted **\n');
-        callMainPrompts();
-      }); 
-    })
-  }
- 
-  // Delete Role
-  //----------------------
-  
-  async function deleteRole(){
-  
-    var rolesArray = await generateRoleChoices();
-
-    inquirer
-      .prompt([
-        {
-          type: 'list',
-          name: 'role',
-          message: "Which role would you like to delete?",
-          choices: rolesArray
-        }
-      ])
-      .then((data) => {
-        db.query(`DELETE FROM roles WHERE id = ${data.role}`, 
-          function (err, results) { 
-          console.log('\n** Role deleted **\n');
-          callMainPrompts();
-        });
-      })
-  }
-
-  // Delete Department
-  //----------------------
-  
-  async function deleteDepartment(){
-  
-    var depsArray = await generateDepartmentChoices();
-
-    inquirer
-      .prompt([
-        {
-          type: 'list',
-          name: 'department',
-          message: "Which department would you like to delete?",
-          choices: depsArray
-        }
-      ])
-      .then((data) => {     
-        db.query(`DELETE FROM departments WHERE id = ${data.department}`, 
-          function (err, results) { 
-          console.log('\n** Department deleted **\n');
-          callMainPrompts();
-        });
-      })
-  }
-
 // View Advanced
 //----------------------------------------------------//
 
@@ -576,7 +472,8 @@ function viewAdvanced(){
       FROM employees 
       LEFT JOIN roles on employees.role_id = roles.id
       LEFT JOIN departments on roles.department_id = departments.id
-      GROUP BY departments.id, departments.name;`, 
+      GROUP BY departments.id, departments.name
+      ORDER BY departments.id;`, 
       
       function (err, results) { 
         console.log('\n** See data below **\n');

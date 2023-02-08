@@ -1,6 +1,3 @@
-
--- ************** orig queries **************--
-
 -- -- View employees 
 -- SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department, manager.first_name as manager_first, manager.last_name as manager_last
     -- FROM employees
@@ -30,20 +27,4 @@
     -- FROM employees 
     -- LEFT JOIN roles on employees.role_id = roles.id
     -- LEFT JOIN departments on roles.department_id = departments.id
-    -- GROUP BY departments.id,  departments.name;
-
-
--- ************** new queries **************--
-
--- new employee query
-SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department, CONCAT(m.first_name, " ", m.last_name) AS manager
-    FROM employees 
-    LEFT JOIN roles ON employees.role_id = roles.id
-    LEFT JOIN departments ON roles.department_id = departments.id
-    LEFT JOIN employees m ON employees.manager_id = m.id 
-    ORDER BY employees.id;
-
-
--- SELECT roles.id, roles.title, roles.salary, departments.name AS department
---       FROM roles
---       LEFT JOIN departments ON roles.department_id = departments.id;
+    -- GROUP BY departments.id, departments.name;
