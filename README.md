@@ -4,7 +4,9 @@
 
 This app is a command-line content management system, designed to let a user manage a company's employee database, using Node.js, Inquirer, and MySQL.  With the app, you can create and modify items including employees, roles, and departments, as well as see advanced metrics about the organization's makeup.  Be sure to view the 'update an employee manager' and 'view advanced' sections for bonus functionality (deletion has been removed due to resulting database conflicts)
 
-View more info below, as well as a video preview and a screenshot of the app in action.  
+View more info below, as well as the github repo, a video preview, and a screenshot of the app in action.  
+
+Github: [link here](https://github.com/BenjiCCB/challenge-12)
 
 Video overview: [link here](https://monosnap.com/file/1jQpKT3Yd7HAYYASv5lBfD0iBKZE7a)
 
